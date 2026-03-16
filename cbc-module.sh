@@ -1,6 +1,83 @@
 #!/usr/bin/env bash
 
 ################################################################################
+# BACKUP
+################################################################################
+
+backup() {
+  OPTIND=1
+
+  local filename=$(basename "$1")                             # Get the base name of the file
+  local timestamp=$(date +%Y.%m.%d.%H.%M.%S)                  # Get the current timestamp
+  local backup_filename="${filename}_backup_${timestamp}.bak" # Create the backup file name
+
+  usage() {
+    cbc_style_box "$CATPPUCCIN_MAUVE" "Description:" \
+      "  Create a timestamped backup of a specified file."
+
+    cbc_style_box "$CATPPUCCIN_BLUE" "Usage:" \
+      "  backup [file] [-h]"
+
+    cbc_style_box "$CATPPUCCIN_TEAL" "Options:" \
+      "  -h    Display this help message"
+
+    cbc_style_box "$CATPPUCCIN_PEACH" "Example:" \
+      "  backup test.txt"
+  }
+
+  while getopts ":h" opt; do
+    case $opt in
+    h)
+      usage
+      return
+      ;;
+    \?)
+      cbc_style_message "$CATPPUCCIN_RED" "Invalid option: -$OPTARG. Use -h for help."
+      return
+      ;;
+    esac
+  done
+
+  shift $((OPTIND - 1))
+
+  # Function to check if no arguments are provided
+  check_no_arguments() {
+    if [ $# -eq 0 ]; then
+      cbc_style_message "$CATPPUCCIN_RED" "Error: No arguments provided. Use -h for help."
+      return 1
+    fi
+  }
+
+  # Function to check if the file exists
+  check_file_exists() {
+    if [ ! -f "$1" ]; then
+      cbc_style_message "$CATPPUCCIN_RED" "Error: File not found."
+      return 1
+    fi
+  }
+
+  # Function to create a backup file
+  make_backup() {
+    if cp "$1" "$backup_filename"; then
+      cbc_style_message "$CATPPUCCIN_GREEN" "Backup created: $backup_filename"
+    else
+      cbc_style_message "$CATPPUCCIN_RED" "Failed to create backup."
+      return 1
+    fi
+  }
+
+  # Main logic
+  main() {
+    check_no_arguments "$@" || return
+    check_file_exists "$1" || return
+    make_backup "$1"
+  }
+
+  # Call the main function with arguments
+  main "$@"
+}
+
+################################################################################
 # SMARTSORT
 ################################################################################
 
