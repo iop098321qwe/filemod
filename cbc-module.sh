@@ -1,6 +1,71 @@
 #!/usr/bin/env bash
 
 ################################################################################
+# EXTRACT
+################################################################################
+
+extract() {
+  OPTIND=1
+
+  usage() {
+    cbc_style_box "$CATPPUCCIN_MAUVE" "Description:" \
+      "  Extract a variety of compressed archive formats."
+
+    cbc_style_box "$CATPPUCCIN_BLUE" "Usage:" \
+      "  extract [file] [-h]"
+
+    cbc_style_box "$CATPPUCCIN_TEAL" "Options:" \
+      "  -h    Display this help message"
+
+    cbc_style_box "$CATPPUCCIN_PEACH" "Example:" \
+      "  extract file.tar.gz"
+  }
+
+  while getopts ":h" opt; do
+    case ${opt} in
+    h)
+      usage
+      return 0
+      ;;
+    \?)
+      cbc_style_message "$CATPPUCCIN_RED" "Invalid option: -$OPTARG"
+      return 1
+      ;;
+    esac
+  done
+
+  shift $((OPTIND - 1))
+
+  if [ -z "$1" ]; then
+    cbc_style_message "$CATPPUCCIN_RED" "Error: No file specified"
+    return 1
+  fi
+
+  if [ ! -f "$1" ]; then
+    cbc_style_message "$CATPPUCCIN_RED" "Error: File not found"
+    return 1
+  fi
+
+  case "$1" in
+  *.tar.bz2) tar xjf "$1" ;;
+  *.tar.gz) tar xzf "$1" ;;
+  *.bz2) bunzip2 "$1" ;;
+  *.rar) unrar x "$1" ;;
+  *.gz) gunzip "$1" ;;
+  *.tar) tar xf "$1" ;;
+  *.tbz2) tar xjf "$1" ;;
+  *.tgz) tar xzf "$1" ;;
+  *.zip) unzip "$1" ;;
+  *.Z) uncompress "$1" ;;
+  *.7z) 7z x "$1" ;;
+  *.deb) ar x "$1" ;;
+  *.tar.xz) tar xf "$1" ;;
+  *.tar.zst) unzstd "$1" ;;
+  *) cbc_style_message "$CATPPUCCIN_RED" "'$1' cannot be extracted using extract()" ;;
+  esac
+}
+
+################################################################################
 # FILEHASH
 ################################################################################
 
